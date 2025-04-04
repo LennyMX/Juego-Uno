@@ -1,0 +1,36 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
+class JugadorUNO {
+    private final String nombre;
+    private final List<CartaUNO> mano;
+
+    public JugadorUNO(String nombre) {
+        this.nombre = nombre;
+        this.mano = new ArrayList<>();
+    }
+
+    public void recibirCarta(CartaUNO carta) {
+        mano.add(carta);
+    }
+
+    public void mostrarMano() {
+        System.out.println(nombre + " tiene:");
+        IntStream.range(0, mano.size())  
+                .forEach(i -> System.out.println((i + 1) + ": " + mano.get(i)));
+        System.out.println("0: Robar una carta");
+    }
+
+    public boolean tieneCartas() {
+        return !mano.isEmpty();
+    }
+
+    public String getNombre() { return nombre; }
+
+    public List<CartaUNO> getMano() { return mano; }
+
+    public CartaUNO jugarCarta(int indice) {
+        return mano.remove(indice);
+    }
+}
