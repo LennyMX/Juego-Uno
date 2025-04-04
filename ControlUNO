@@ -1,0 +1,120 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.*;
+
+class ControlUNO {
+    private final List<JugadorUNO> jugadores;
+    private final MazoUNO mazo;
+    private CartaUNO cartaEnMesa;
+    private int turnoActual;
+    private boolean direccionNormal = true;
+    private final Scanner scanner = new Scanner(System.in);
+
+    public ControlUNO(List<String> nombresJugadores) {
+        jugadores = new ArrayList<>();
+        nombresJugadores.forEach(nombre -> jugadores.add(new JugadorUNO(nombre)));
+        mazo = new MazoUNO();
+        turnoActual = 0;
+        repartirCartasIniciales();
+        cartaEnMesa = mazo.robarCarta();
+        System.out.println("Carta inicial en la mesa: " + cartaEnMesa);
+    }
+
+    private void repartirCartasIniciales() {
+        for (int i = 0; i < 7; i++) {
+            jugadores.forEach(jugador -> jugador.recibirCarta(mazo.robarCarta()));
+        }
+    }
+
+    public void iniciarJuego() {
+        while (true) {
+            JugadorUNO jugador = jugadores.get(turnoActual);
+            System.out.println("\nTurno de " + jugador.getNombre());
+            jugador.mostrarMano();
+
+            boolean jugadaValida = false;
+            while (!jugadaValida) {
+                System.out.println("Carta en la mesa: " + cartaEnMesa);
+                jugador.mostrarMano();
+                System.out.print("Elige el número de la carta a jugar o 0 para robar: ");
+                int opcion = scanner.nextInt();
+
+                if (opcion == 0) { 
+                    CartaUNO cartaRobada = mazo.robarCarta();
+                    jugador.recibirCarta(cartaRobada);
+                    System.out.println("Robaste: " + cartaRobada);
+                    continue;
+                }
+
+                if (opcion >= 1 && opcion <= jugador.getMano().size()) {
+                    CartaUNO cartaJugada = jugador.getMano().get(opcion - 1);
+                    if (esJugadaValida(cartaJugada)) {
+                        jugador.jugarCarta(opcion - 1);
+                        cartaEnMesa = cartaJugada;
+                        aplicarEfectoCarta(cartaJugada);
+
+
+                        if (jugador.getMano().isEmpty()) {
+                            System.out.println( + jugador.getNombre() + " ha ganado el juego");
+                            System.exit(0); 
+                        }
+
+                        jugadaValida = true;
+                    } else {
+                        System.out.println("Esa carta no es válida, intenta de nuevo.");
+                    }
+                } else {
+                    System.out.println("Número inválido, intenta de nuevo.");
+                }
+            }
+
+            if (!jugador.tieneCartas()) {
+                System.out.println("\n¡" + jugador.getNombre() + " ha ganado!");
+                break;
+            }
+
+            cambiarTurno();
+        }
+    }
+
+    private boolean esJugadaValida(CartaUNO carta) {
+        return carta.getColor() == cartaEnMesa.getColor() ||
+                carta.getTipo() == cartaEnMesa.getTipo() ||
+                carta.getTipo() == CartaUNO.Tipo.CAMBIO_COLOR ||
+                carta.getTipo() == CartaUNO.Tipo.MAS_CUATRO;
+    }
+
+    private void aplicarEfectoCarta(CartaUNO carta) {
+        switch (carta.getTipo()) {
+            case BLOQUEO:
+                cambiarTurno();
+                break;
+            case REVERSA:
+                direccionNormal = !direccionNormal;
+                break;
+            case MAS_DOS:
+                jugadores.get(siguienteTurno()).recibirCarta(mazo.robarCarta());
+                jugadores.get(siguienteTurno()).recibirCarta(mazo.robarCarta());
+                break;
+            case MAS_CUATRO:
+                System.out.println("Escoge un color (ROJO, AZUL, VERDE, AMARILLO): ");
+                carta.setColor(CartaUNO.Color.valueOf(scanner.next().toUpperCase()));
+                for (int i = 0; i < 4; i++) {
+                    jugadores.get(siguienteTurno()).recibirCarta(mazo.robarCarta());
+                }
+                break;
+            case CAMBIO_COLOR:
+                System.out.println("Escoge un color (ROJO, AZUL, VERDE, AMARILLO): ");
+                carta.setColor(CartaUNO.Color.valueOf(scanner.next().toUpperCase()));
+                break;
+        }
+    }
+
+    private void cambiarTurno() {
+        turnoActual = siguienteTurno();
+    }
+
+    private int siguienteTurno() {
+        return direccionNormal ? (turnoActual + 1) % jugadores.size() : (turnoActual - 1 + jugadores.size()) % jugadores.size();
+    }
+}
