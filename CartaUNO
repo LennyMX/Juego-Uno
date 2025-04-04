@@ -1,0 +1,36 @@
+import java.util.*;
+class CartaUNO {
+    enum Color { ROJO, AZUL, VERDE, AMARILLO, ESPECIAL }
+    enum Tipo { NUMERO, BLOQUEO, REVERSA, MAS_DOS, MAS_CUATRO, CAMBIO_COLOR }
+
+    private Color color;
+    private final Tipo tipo;
+    private final int valor; 
+
+    public CartaUNO(Color color, Tipo tipo, int valor) {
+        this.color = color;
+        this.tipo = tipo;
+        this.valor = valor;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+    public Tipo getTipo() {
+        return tipo;
+    }
+    public int getValor() {
+        return valor;
+    }
+
+    public void setColor(Color color) {
+        if (this.tipo == Tipo.CAMBIO_COLOR || this.tipo == Tipo.MAS_CUATRO) {
+            this.color = color;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return (tipo == Tipo.NUMERO) ? color + " " + valor : color + " " + tipo;
+    }
+}
