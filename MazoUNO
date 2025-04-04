@@ -1,0 +1,35 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+class MazoUNO {
+    private final List<CartaUNO> mazo;
+
+    public MazoUNO() {
+        mazo = new ArrayList<>();
+        inicializarMazo();
+        Collections.shuffle(mazo);
+    }
+
+    private void inicializarMazo() {
+        for (CartaUNO.Color color : CartaUNO.Color.values()) {
+            if (color != CartaUNO.Color.ESPECIAL) {
+                for (int i = 0; i <= 9; i++) {
+                    mazo.add(new CartaUNO(color, CartaUNO.Tipo.NUMERO, i));
+                }
+                mazo.add(new CartaUNO(color, CartaUNO.Tipo.BLOQUEO, -1));
+                mazo.add(new CartaUNO(color, CartaUNO.Tipo.REVERSA, -1));
+                mazo.add(new CartaUNO(color, CartaUNO.Tipo.MAS_DOS, -1));
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            mazo.add(new CartaUNO(CartaUNO.Color.ESPECIAL, CartaUNO.Tipo.MAS_CUATRO, -1));
+            mazo.add(new CartaUNO(CartaUNO.Color.ESPECIAL, CartaUNO.Tipo.CAMBIO_COLOR, -1));
+        }
+    }
+
+    public CartaUNO robarCarta() {
+        if (!mazo.isEmpty()) return mazo.remove(0);
+        return null; 
+    }
+}
